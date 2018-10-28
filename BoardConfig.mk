@@ -35,8 +35,7 @@ TARGET_KERNEL_HEADER_ARCH := arm64
 TARGET_KERNEL_CONFIG := twrp_defconfig
 TARGET_KERNEL_DEVICE_DEFCONFIG := device_hero2qlte_tmo
 
-TARGET_PREBUILT_KERNEL := $(DEVICE_TREE)/Image.gz
-TARGET_PREBUILT_DTB := $(DEVICE_TREE)/dtb.img
+TARGET_PREBUILT_KERNEL := $(DEVICE_TREE)/kernel
 
 # Boot image
 BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom androidboot.bootdevice=624000.ufshc androidboot.selinux=permissive user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 cma=24M@0-0xffffffff rcupdate.rcu_expedited=1
@@ -65,7 +64,7 @@ RECOVERY_SDCARD_ON_DATA := true
 TARGET_RECOVERY_QCOM_RTC_FIX := true
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/soc/6a00000.ssusb/6a00000.dwc3/gadget/lun%d/file"
-TW_BRIGHTNESS_PATH := "/sys/devices/soc/900000.qcom\x2cmdss_mdp/900000.qcom\x2cmdss_mdp:qcom\x2cmdss_fb_primary/leds/lcd-backlight/brightness"
+TW_BRIGHTNESS_PATH := "/sys/devices/virtual/lcd/panel/panel/brightness"
 TW_MAX_BRIGHTNESS := 255
 TW_DEFAULT_BRIGHTNESS := 162
 TW_NO_REBOOT_BOOTLOADER := true
@@ -73,15 +72,15 @@ TW_HAS_DOWNLOAD_MODE := true
 TW_INCLUDE_NTFS_3G := true
 # exFAT drivers included in the kernel
 TW_NO_EXFAT_FUSE := true
-# No love for the wicked (device ships with M)
-TW_EXCLUDE_SUPERSU := true
+TW_NO_LEGACY_PROPS := true
+TW_USE_NEW_MINADBD := true
 
 # Encryption support
 TW_INCLUDE_CRYPTO := true
 # Disable Qualcomm and Samsung encryption as we are missing msm8996 keystore support
 #TW_INCLUDE_CRYPTO_SAMSUNG := true
-#TARGET_HW_DISK_ENCRYPTION := true
-#TARGET_KEYMASTER_WAIT_FOR_QSEE := true
+TARGET_HW_DISK_ENCRYPTION := true
+TARGET_KEYMASTER_WAIT_FOR_QSEE := true
 
 # Debug flags
 #TWRP_INCLUDE_LOGCAT := true

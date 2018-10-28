@@ -1,0 +1,76 @@
+#!/sbin/bbx
+# By Mohammad Afaneh, Afaneh92@xda
+PATH=/sbin:/system/bin:/system/xbin
+
+setenforce 0
+
+BBX=/sbin/bbx
+
+$BBX chmod 755 $BBX
+
+# mount root rw
+$BBX mount -o remount,rw rootfs /
+
+# HASH: Another KK+ Hack. /system is mounted RO by default, remount here for the future
+$BBX mount -o remount,rw /system
+
+# move bins out of the way so they don't block
+$BBX mv /sbin/adbd /sbin/adbd.old
+$BBX mv /sbin/dm_verity_tz_cmd /sbin/dm_verity_tz_cmd.old
+$BBX mv /sbin/recovery /sbin/recovery.old
+$BBX mv /sbin/ueventd /sbin/ueventd.old
+$BBX mv /sbin/charger /sbin/charger.old
+$BBX mv /sbin/knox_changer /sbin/knox_changer.old
+$BBX mv /sbin/sswap /sbin/sswap.old
+$BBX mv /sbin/watchdogd /sbin/watchdogd.old
+$BBX mv /init /init.old
+
+# backup selinux/prop files
+$BBX cp /android.hardware.drm@1.0-service.widevine.rc  /tmp/
+$BBX cp /sepolicy /tmp/
+$BBX cp /sepolicy_version /tmp/
+$BBX cp /nonplat_file_contexts /tmp/
+$BBX cp /nonplat_hwservice_contexts /tmp/
+$BBX cp /nonplat_property_contexts /tmp/
+$BBX cp /nonplat_seapp_contexts /tmp/
+$BBX cp /nonplat_service_contexts /tmp/
+$BBX cp /plat_file_contexts /tmp/
+$BBX cp /plat_hwservice_contexts /tmp/
+$BBX cp /plat_property_contexts /tmp/
+$BBX cp /plat_seapp_contexts /tmp/
+$BBX cp /plat_service_contexts /tmp/
+$BBX cp /vndservice_contexts /tmp/
+$BBX echo "ro.secure=0" > /tmp/default.prop
+$BBX echo "ro.allow.mock.location=1" >> /tmp/default.prop
+$BBX echo "ro.debuggable=1" >> /tmp/default.prop
+$BBX echo "persist.sys.usb.config=mtp,adb" >> /tmp/default.prop
+$BBX cat /system/build.prop >> /tmp/default.prop
+$BBX chmod 644 /tmp/*
+
+# clear out local files
+$BBX rm /* > /dev/null 2>&1
+
+# extract recovery ramdisk
+cd /
+$BBX gzip -dc /tmp/ramdisk-recovery.img | $BBX cpio -iu
+
+# copy back selinux/prop files
+$BBX cp /tmp/* /
+$BBX rm /tmp/*
+
+$BBX chmod 750 /sbin/*
+$BBX sync
+
+$BBX mount -o remount,ro /system
+$BBX umount -l /system
+
+# kill recovery processes
+$BBX killall recovery
+$BBX killall adbd
+
+$BBX sync
+
+# the recovery is not automatically restarted
+/sbin/recovery &
+
+exit
