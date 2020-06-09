@@ -69,6 +69,7 @@ TW_MAX_BRIGHTNESS := 255
 TW_DEFAULT_BRIGHTNESS := 162
 TW_NO_REBOOT_BOOTLOADER := true
 TW_HAS_DOWNLOAD_MODE := true
+TW_HAS_EDL_MODE := true
 TW_INCLUDE_NTFS_3G := true
 # exFAT drivers included in the kernel
 TW_NO_EXFAT_FUSE := true
