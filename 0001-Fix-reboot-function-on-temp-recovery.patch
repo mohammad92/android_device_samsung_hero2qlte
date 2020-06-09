@@ -1,0 +1,84 @@
+From a38fc7ee63049e6a656c95769ff37ffc22f58abd Mon Sep 17 00:00:00 2001
+From: Mohammad Afaneh <mohammad.afaneh92@gmail.com>
+Date: Wed, 10 Jun 2020 00:01:03 +0300
+Subject: [PATCH] Fix reboot function on temp recovery
+
+Change-Id: I5e4331b1c52aa8dd8d4a8a66a6e4e3a217e3b05f
+---
+ twrp-functions.cpp | 26 +++++++++++---------------
+ 1 file changed, 11 insertions(+), 15 deletions(-)
+
+diff --git a/twrp-functions.cpp b/twrp-functions.cpp
+index 593ad9d..bf49243 100755
+--- a/twrp-functions.cpp
++++ b/twrp-functions.cpp
+@@ -26,7 +26,6 @@
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <sys/mount.h>
+-#include <sys/reboot.h>
+ #include <sys/sendfile.h>
+ #include <sys/stat.h>
+ #include <sys/vfs.h>
+@@ -650,47 +649,44 @@ int TWFunc::tw_reboot(RebootCommand command)
+ 			Update_Intent_File("s");
+ 			sync();
+ 			check_and_run_script("/sbin/rebootsystem.sh", "reboot system");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "reboot,");
+-#elif defined(ANDROID_RB_RESTART)
++
++#if defined(ANDROID_RB_RESTART)
+ 			return android_reboot(ANDROID_RB_RESTART, 0, 0);
+ #else
+ 			return reboot(RB_AUTOBOOT);
+ #endif
+ 		case rb_recovery:
+ 			check_and_run_script("/sbin/rebootrecovery.sh", "reboot recovery");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "reboot,recovery");
++#if defined(ANDROID_RB_RESTART2)
++			return android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
+ #else
+ 			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "recovery");
+ #endif
+ 		case rb_bootloader:
+ 			check_and_run_script("/sbin/rebootbootloader.sh", "reboot bootloader");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "reboot,bootloader");
++#if defined(ANDROID_RB_RESTART2)
++			return android_reboot(ANDROID_RB_RESTART2, 0, "bootloader");
+ #else
+ 			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "bootloader");
+ #endif
+ 		case rb_poweroff:
+ 			check_and_run_script("/sbin/poweroff.sh", "power off");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "shutdown,");
+-#elif defined(ANDROID_RB_POWEROFF)
++#if defined(ANDROID_RB_POWEROFF)
+ 			return android_reboot(ANDROID_RB_POWEROFF, 0, 0);
+ #else
+ 			return reboot(RB_POWER_OFF);
+ #endif
+ 		case rb_download:
+ 			check_and_run_script("/sbin/rebootdownload.sh", "reboot download");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "reboot,download");
++#if defined(ANDROID_RB_RESTART2)
++			return android_reboot(ANDROID_RB_RESTART2, 0, "download");
+ #else
+ 			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "download");
+ #endif
+ 		case rb_edl:
+ 			check_and_run_script("/sbin/rebootedl.sh", "reboot edl");
+-#ifdef ANDROID_RB_PROPERTY
+-			return property_set(ANDROID_RB_PROPERTY, "reboot,edl");
++#if defined(ANDROID_RB_RESTART2)
++			return android_reboot(ANDROID_RB_RESTART2, 0, "edl");
+ #else
+ 			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "edl");
+ #endif
+-- 
+2.20.1
+
